@@ -26,18 +26,14 @@
 <div style="width:80%; margin-left:10%;">
     <h1>{{article.title}}</h1>
     <a href="{% url 'auth:users_detail' article.author.pk %}"> Автор {{article.author}}</a>
-    {% if request.user.is_authenticated %}
         {% include "mainapp/includes/like.html" with model=article.author text="лайк автору" %}
-    {% endif %}
     <!--                <div class="like_btn">-->
     <!--        <a href="#" class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-none u-text-black u-text-hover-white u-btn-1"><span class="u-file-icon u-icon"><img src="{% static 'images/126473.png' %}" alt=""></span>&nbsp;Like-->
     <!--        </a>-->
     <!--    </div>-->
     <p>Категория {{article.category}}</p>
     <p style="">{{article.article_text}}</p>
-    {% if request.user.is_authenticated %}
         {% include "mainapp/includes/like.html" with model=article text="лайк статье"%}
-    {% endif %}
     <!--            <div class="tm-separated-list tm-article-presenter__meta-list">-->
     <!--                <span class="tm-separated-list__title">-->
     <!--                    Тэги:-->
@@ -49,14 +45,7 @@
     <!--                </ul>-->
     <!--            </div>-->
 </div>
-<!--<div class="like_btn">-->
-<!--        <a href="#" class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-none u-text-black u-text-hover-white u-btn-1"><span class="u-file-icon u-icon"><img src="{% static 'images/126473.png' %}" alt=""></span>&nbsp;Like-->
-<!--        </a>-->
-<!--    </div>-->
-<!--<div class="dislike_btn">-->
-<!--        <a href="#" class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-none u-text-black u-text-hover-white u-btn-2"><span class="u-file-icon u-icon"><img src="{% static 'images/126504.png' %}" alt=""></span>&nbsp;DISLike-->
-<!--        </a>-->
-<!--</div>-->
+
 {% if article.tags %}
     {% for tag in article.tags.all %}
     <p>
@@ -73,8 +62,19 @@
 
 </div>
 
+<div class="reg">
+{% if request.user.is_authenticated %}
 {% include "mainapp/includes/comments.html" %}
 <p>{{user}}</p>
+{% endif %}
+</div>
+
+<div class="reg">
+{% if not request.user.is_authenticated %}
+Хотите оценить статью или оставить комментарий?
+<a href="{% url 'auth:users_create' %}?next={{request.path}}" target="_blank">Зарегистрируйтесь!</a>
+{% endif %}
+</div>
 
 {% include 'mainapp/includes/inc_carousel.html' %}
 

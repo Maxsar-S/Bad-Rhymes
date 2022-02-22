@@ -43,7 +43,7 @@ class ArticleCategory(models.Model):
         return queryset
 
 
-class Article(models.Model):
+class Article(models.Model, ModelClassNameMixin):
     # CATEGORY_CHOICES = (
     #     ("DESIGN", "Design"),
     #     ("WEB_DEV", "Web Development"),
@@ -91,7 +91,7 @@ class Article(models.Model):
                 self.save()
 
 
-class Comment(models.Model):
+class Comment(models.Model, ModelClassNameMixin):
     # author = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)

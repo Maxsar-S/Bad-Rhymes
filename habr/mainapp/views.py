@@ -18,6 +18,11 @@ class AuthorTestMixin(UserPassesTestMixin):
         return self.request.user == self.get_object().author
 
 
+class BanTestMixin(UserPassesTestMixin):
+    def test_func(self):
+        return not self.request.user.is_banned
+
+
 class ArticlesView(ListView):
     model = Article
     ordering = '-created_date'
@@ -62,28 +67,6 @@ class ArticleView(DetailView):
         comments = Comment.objects.filter(article__pk=self.kwargs['pk'])
         return comments
 
-    def post(self, request, *args, **kwargs):
-        form = CommentForm(request.POST)
-        self.object = self.get_object()
-        context = self.get_context_data(**kwargs)
-        context['form'] = form
-
-        if form.is_valid():
-            text = form.cleaned_data['text']
-            author = self.request.user
-            article = self.get_object()
-            comments = self.get_comments()
-
-            comment = Comment.objects.create(author=author, article=article, text=text)
-            comment.save()
-
-            form = CommentForm()
-            context['form'] = form
-            context['comments'] = comments
-            return self.render_to_response(context=context)
-
-        return self.render_to_response(context=context)
-
     def get_same_articles(self):
         if self.object.tags:
             same_articles = None
@@ -101,7 +84,7 @@ class ArticleView(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ArticleCreateView(LoginRequiredMixin, CreateView):
+class ArticleCreateView(LoginRequiredMixin, BanTestMixin, CreateView):
     model = Article
     template_name = 'mainapp/create_article.html'
     form_class = CreateArticleForm
@@ -140,7 +123,7 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
 
 class ArticleDeleteView(LoginRequiredMixin, AuthorTestMixin, DeleteView):
     model = Article
-    login_url = '/authenticate/login/'
+    login_url = '/auth/login/'
     success_url = reverse_lazy('mainapp:articles')
 
     def form_valid(self, form):
@@ -161,7 +144,27 @@ def about_us(request):
     return render(request, 'mainapp/about_us.html', content)
 
 
-class CommentReplyView(LoginRequiredMixin, View):
+class CommentView(LoginRequiredMixin, BanTestMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        form = CommentForm(request.POST)
+        article = Article.objects.get(pk=pk)
+
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.author = request.user
+            new_comment.article = article
+            new_comment.save()
+
+            comments = Comment.objects.filter(article=article).order_by('-created_at')
+            context = {
+                'article': article,
+                'form': form,
+                'comments': comments,
+            }
+            return HttpResponseRedirect(reverse('mainapp:article', kwargs={'pk': article.pk}))
+
+
+class CommentReplyView(LoginRequiredMixin, BanTestMixin, View):
     def post(self, request, article_pk, pk, *args, **kwargs):
         article = Article.objects.get(pk=article_pk)
         parent_comment = Comment.objects.get(pk=pk)
@@ -179,16 +182,21 @@ class CommentReplyView(LoginRequiredMixin, View):
             'form': form,
             'comments': comments,
         }
-        # return redirect('mainapp:article', pk=article_pk)
         return HttpResponseRedirect(reverse('mainapp:article', kwargs={'pk': article_pk}))
 
 
-class LikeSwitcher(LoginRequiredMixin, View):
+class LikeSwitcher(LoginRequiredMixin, BanTestMixin, View):
+    login_url = '/auth/login/'
+
+    def handle_no_permission(self):
+        self.request.path = self.request.path.replace('/like', '')
+        return super(LikeSwitcher, self).handle_no_permission()
+
     def post(self, request, model, pk, *args, **kwargs):
         models = {
-            'article': Article,
-            'comment': Comment,
-            'user': User,
+            'Article': Article,
+            'Comment': Comment,
+            'User': User,
         }
         is_liked = False
         model_to_liked = models[model].objects.get(pk=pk)
