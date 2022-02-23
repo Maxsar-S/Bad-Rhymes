@@ -17,5 +17,5 @@ urlpatterns = [
     path('article/<int:article_pk>/comment/reply/<int:pk>', mainapp.CommentReplyView.as_view(), name='comment-reply'),
     path('article/<int:pk>/comment/', mainapp.CommentView.as_view(), name='comment'),
     path('like/<str:model>/<int:pk>', LikeSwitcher.as_view(), name='like'),
-    path('help/', mainapp.help, name='help'),
+    # path('help/', mainapp.help, name='help'),
 ]
