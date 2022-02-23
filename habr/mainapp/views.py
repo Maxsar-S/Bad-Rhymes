@@ -210,3 +210,10 @@ class LikeSwitcher(LoginRequiredMixin, BanTestMixin, View):
             model_to_liked.likes.add(request.user)
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
+
+
+def help(request):
+    title = 'Помощь'
+    content = {'title': title}
+
+    return render(request, 'mainapp/help.html', content)
