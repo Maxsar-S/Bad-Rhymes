@@ -55,7 +55,7 @@ class Article(models.Model, ModelClassNameMixin):
 
     # Django based user, to be deleted upon creation of custom User model
     # user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles')
     title = models.CharField(max_length=200)
     article_text = models.TextField()
     created_date = models.DateTimeField(default=timezone.now())
@@ -94,14 +94,13 @@ class Article(models.Model, ModelClassNameMixin):
 
 class Comment(models.Model, ModelClassNameMixin):
     # author = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
     text = models.TextField()
     is_banned = models.BooleanField(default=None, null=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='+')
     likes = models.ManyToManyField(User, blank=True, related_name='comment_likes')
-
 
     @property
     def children(self):

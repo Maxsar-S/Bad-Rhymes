@@ -9,6 +9,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from authapp.models import User
+from moderation.models import Report
 from .forms import CommentForm, CreateArticleForm
 from .models import ArticleCategory, Article, Comment
 
@@ -23,6 +24,16 @@ class BanTestMixin(UserPassesTestMixin):
         return not self.request.user.is_banned
 
 
+def get_top10_articles():
+    top10_articles = Article.objects.annotate(cnt=Count('likes')).order_by('-cnt')[:5]
+    return top10_articles
+
+def get_top10_users():
+    top10_users = User.objects.annotate(total_articles_likes=Sum('articles__likes')).annotate(
+        total_comments_likes=Sum('comments__likes')).annotate(total_user_likes=Count('likes')).annotate(total_rating='')
+    pass
+
+
 class ArticlesView(ListView):
     model = Article
     ordering = '-created_date'
@@ -32,6 +43,7 @@ class ArticlesView(ListView):
     extra_context = {
         'title': 'Habr',
         'categories': ArticleCategory.objects.all(),
+        'top10_articles': get_top10_articles(),
     }
 
     def get_queryset(self):
@@ -64,11 +76,12 @@ class ArticleView(DetailView):
         return context
 
     def get_comments(self):
-        comments = Comment.objects.filter(article__pk=self.kwargs['pk'])
+        comments = Comment.objects.filter(article__pk=self.kwargs['pk'],
+                                          is_banned=None)
         return comments
 
     def get_same_articles(self):
-        if self.object.tags:
+        if self.object.tags.count() > 0:
             same_articles = None
             for tag in self.object.tags.all():
                 same_tag_articles = tag.tagged_articles.all().annotate(cnt=Count('likes'))
@@ -121,6 +134,7 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
         return super(ArticleUpdateView, self).form_valid(form)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ArticleDeleteView(LoginRequiredMixin, AuthorTestMixin, DeleteView):
     model = Article
     login_url = '/auth/login/'
@@ -144,12 +158,14 @@ def about_us(request):
     return render(request, 'mainapp/about_us.html', content)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CommentView(LoginRequiredMixin, BanTestMixin, View):
     def post(self, request, pk, *args, **kwargs):
         form = CommentForm(request.POST)
         article = Article.objects.get(pk=pk)
 
         if form.is_valid():
+            text = form.cleaned_data['text']
             new_comment = form.save(commit=False)
             new_comment.author = request.user
             new_comment.article = article
@@ -161,20 +177,28 @@ class CommentView(LoginRequiredMixin, BanTestMixin, View):
                 'form': form,
                 'comments': comments,
             }
+            if '@moderator' in text:
+                report = Report.create(object_pk=article, user=request.user)
+                report.save()
             return HttpResponseRedirect(reverse('mainapp:article', kwargs={'pk': article.pk}))
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CommentReplyView(LoginRequiredMixin, BanTestMixin, View):
     def post(self, request, article_pk, pk, *args, **kwargs):
         article = Article.objects.get(pk=article_pk)
         parent_comment = Comment.objects.get(pk=pk)
         form = CommentForm(request.POST)
         if form.is_valid():
+            text = form.cleaned_data['text']
             new_comment = form.save(commit=False)
             new_comment.author = request.user
             new_comment.article = article
             new_comment.parent = parent_comment
             new_comment.save()
+            if '@moderator' in text:
+                report = Report.create(object_pk=parent_comment, user=request.user)
+                report.save()
 
         comments = Comment.objects.filter(article=article).order_by('-created_at')
         context = {
@@ -185,6 +209,7 @@ class CommentReplyView(LoginRequiredMixin, BanTestMixin, View):
         return HttpResponseRedirect(reverse('mainapp:article', kwargs={'pk': article_pk}))
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LikeSwitcher(LoginRequiredMixin, BanTestMixin, View):
     login_url = '/auth/login/'
 
@@ -194,9 +219,9 @@ class LikeSwitcher(LoginRequiredMixin, BanTestMixin, View):
 
     def post(self, request, model, pk, *args, **kwargs):
         models = {
-            'Article': Article,
-            'Comment': Comment,
-            'User': User,
+            Article.__name__: Article,
+            Comment.__name__: Comment,
+            User.__name__: User,
         }
         is_liked = False
         model_to_liked = models[model].objects.get(pk=pk)
