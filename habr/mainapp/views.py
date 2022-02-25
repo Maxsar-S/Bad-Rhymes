@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Count, QuerySet, Q
+from django.db.models import Count, Sum
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -76,8 +76,10 @@ class ArticleView(DetailView):
         return context
 
     def get_comments(self):
-        comments = Comment.objects.filter(article__pk=self.kwargs['pk'],
-                                          is_banned=None)
+        comments = Comment.objects.filter(article__pk=self.kwargs['pk'])
+        for comment in comments:
+            if comment.is_banned:
+                comment.text = 'Комментарий заблокирован модератором'
         return comments
 
     def get_same_articles(self):

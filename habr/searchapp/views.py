@@ -12,7 +12,7 @@ from authapp.models import User
 class SearchArticleList(ListView):
     model = Article
     paginate_by = 100
-    template_name = 'searchapp/search_article_results.html'
+    template_name = 'searchapp/search_results.html'
     extra_context = {
         'title': 'Habr',
         'categories': ArticleCategory.objects.all(),
@@ -40,33 +40,3 @@ class SearchArticleList(ListView):
         return context
 
 
-class SearchUserList(ListView):
-    model = User
-    paginate_by = 100
-    template_name = 'searchapp/search_user_results.html'
-    extra_context = {
-        'title': 'Habr',
-    }
-
-    def get_context_data(self, **kwargs):
-        context = context = super(SearchUserList, self).get_context_data(**kwargs)
-
-        q = self.request.GET.get('search')
-        sort = self.request.GET.getlist('sort')
-        context['search_name'] = q
-        if q:
-
-            queryset = User.objects.filter(
-                Q(username__icontains=q.capitalize()) | Q(username__icontains=q.lower())
-                | Q(username__icontains=q.upper()) | Q(first_name__icontains=q.capitalize())
-                | Q(first_name__icontains=q.lower()) | Q(first_name__icontains=q.upper())
-                | Q(last_name__icontains=q.lower()) | Q(last_name__icontains=q.upper())
-                | Q(last_name__icontains=q.lower())
-            )
-
-            if sort:
-                queryset = queryset.order_by(*sort)
-
-            context['users'] = queryset
-
-        return context

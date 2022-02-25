@@ -1,18 +1,8 @@
 from datetime import datetime
-
-from django.contrib.auth.decorators import permission_required
 from django.db import models
-from django.shortcuts import redirect
 
 from mainapp.models import Article, Comment
 from authapp.models import User
-
-
-# OBJECT_CHOICES = (
-#     ("COMMENT", "Comment"),
-#     ("USER", "User"),
-#     ("ARTICLE", "Article"),
-# )
 
 
 class BannedObjects(models.Model):
