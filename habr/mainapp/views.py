@@ -124,7 +124,7 @@ class ArticleCreateView(LoginRequiredMixin, BanTestMixin, CreateView):
 @method_decorator(csrf_exempt, name='dispatch')
 class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
     model = Article
-    template_name = 'mainapp/create_article.html'
+    template_name = 'mainapp/update_article.html'
     form_class = CreateArticleForm
     pk = None
     login_url = '/auth/login/'
@@ -136,6 +136,15 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
         self.object.create_tags()
         self.pk = self.object.pk
         return super(ArticleUpdateView, self).form_valid(form)
+
+    # def get_context_data(self, **kwargs):
+    #     content = super(ArticleUpdateView, self).get_context_data(**kwargs)
+    #     content['title'] = 'Редактирование статьи'
+    #     content['article'] = Article.objects.get(pk=self.request.pk)
+    #     return content
+    #
+    # def get_object(self, queryset=None):
+    #     return Article.objects.get(pk=self.request.pk)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -150,6 +159,20 @@ class ArticleDeleteView(LoginRequiredMixin, AuthorTestMixin, DeleteView):
             self.object.is_published = False
         else:
             self.object.is_published = True
+        self.object.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ArticlePublishView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
+    model = Article
+    login_url = '/auth/login/'
+    success_url = reverse_lazy('mainapp:articles')
+
+    def form_valid(self, form):
+        self.object = self.get_object()
+        self.object.is_published = True
         self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
