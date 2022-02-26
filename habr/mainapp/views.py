@@ -1,11 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Sum
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 
 from authapp.models import User
@@ -21,6 +22,7 @@ class AuthorTestMixin(UserPassesTestMixin):
 
 class BanTestMixin(UserPassesTestMixin):
     def test_func(self):
+        self.permission_denied_message = 'вы забанены'
         return not self.request.user.is_banned
 
 
@@ -214,9 +216,18 @@ class CommentReplyView(LoginRequiredMixin, BanTestMixin, View):
 @method_decorator(csrf_exempt, name='dispatch')
 class LikeSwitcher(LoginRequiredMixin, BanTestMixin, View):
     login_url = '/auth/login/'
+    permission_denied_message = 'вы не авторизованны'
 
     def handle_no_permission(self):
-        self.request.path = self.request.path.replace('/like', '')
+        self.request.path = self.request.META['HTTP_REFERER'].replace(self.request.META['HTTP_ORIGIN'], '')
+        if self.request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            try:
+
+                _handle_no_permission = super(LikeSwitcher, self).handle_no_permission()
+                if _handle_no_permission.status_code == 302:
+                    return JsonResponse({'url': _handle_no_permission.url}, status=302)
+            except PermissionDenied:
+                return JsonResponse({"error": self.permission_denied_message}, status=403)
         return super(LikeSwitcher, self).handle_no_permission()
 
     def post(self, request, model, pk, *args, **kwargs):
@@ -236,7 +247,11 @@ class LikeSwitcher(LoginRequiredMixin, BanTestMixin, View):
         else:
             model_to_liked.likes.add(request.user)
         next = request.POST.get('next', '/')
-        return HttpResponseRedirect(next)
+        if self.request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            return JsonResponse({"likes_count": model_to_liked.likes.count()}, status=200)
+
+        else:
+            return HttpResponseRedirect(next)
 
 
 def help(request):
