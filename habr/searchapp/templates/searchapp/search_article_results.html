@@ -16,6 +16,7 @@
 
     {% if articles %}
         {% for object in articles %}
+            {% if not object.is_banned %}
                 <div class="card col-lg-6 offset-lg-3 mb-3">
                     <div class="card-body">
                         <a>
@@ -32,6 +33,7 @@
                         <a class='btn btn-light' href="{% url 'mainapp:article' object.id %}">Read more ...</a>
                     </div>
                 </div>
+            {% endif %}
         {% endfor %}
     {% else %}
         <p>Не найдено ничего по вашему запросу<br>Попробуйте повторить запрос с другой формулировкой</p>

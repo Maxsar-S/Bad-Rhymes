@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 
 from authapp.models import User
 from moderation.models import Report
-from .forms import CommentForm, CreateArticleForm
+from .forms import CommentForm, CreateArticleForm, UpdateArticleForm
 from .models import ArticleCategory, Article, Comment
 
 
@@ -125,9 +125,10 @@ class ArticleCreateView(LoginRequiredMixin, BanTestMixin, CreateView):
 class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
     model = Article
     template_name = 'mainapp/update_article.html'
-    form_class = CreateArticleForm
+    form_class = UpdateArticleForm
     pk = None
     login_url = '/auth/login/'
+
 
     def get_success_url(self):
         return reverse_lazy('mainapp:article', kwargs={'pk': self.pk})
@@ -137,12 +138,12 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
         self.pk = self.object.pk
         return super(ArticleUpdateView, self).form_valid(form)
 
-    # def get_context_data(self, **kwargs):
-    #     content = super(ArticleUpdateView, self).get_context_data(**kwargs)
-    #     content['title'] = 'Редактирование статьи'
-    #     content['article'] = Article.objects.get(pk=self.request.pk)
-    #     return content
-    #
+    def get_context_data(self, **kwargs):
+        content = super(ArticleUpdateView, self).get_context_data(**kwargs)
+        content['title'] = 'Редактирование статьи'
+        content['article'] = Article.objects.get(field=self.object.pk)
+        return content
+
     # def get_object(self, queryset=None):
     #     return Article.objects.get(pk=self.request.pk)
 
