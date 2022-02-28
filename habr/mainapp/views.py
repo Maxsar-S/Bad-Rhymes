@@ -138,11 +138,11 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
         self.pk = self.object.pk
         return super(ArticleUpdateView, self).form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        content = super(ArticleUpdateView, self).get_context_data(**kwargs)
-        content['title'] = 'Редактирование статьи'
-        content['article'] = Article.objects.get(field=self.object.pk)
-        return content
+    # def get_context_data(self, **kwargs):
+    #     content = super(ArticleUpdateView, self).get_context_data(**kwargs)
+    #     content['title'] = 'Редактирование статьи'
+    #     content['article'] = Article.objects.get(field=self.object.pk)
+    #     return content
 
     # def get_object(self, queryset=None):
     #     return Article.objects.get(pk=self.request.pk)
