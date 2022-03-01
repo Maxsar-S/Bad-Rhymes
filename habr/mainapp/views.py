@@ -129,7 +129,6 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
     pk = None
     login_url = '/auth/login/'
 
-
     def get_success_url(self):
         return reverse_lazy('mainapp:article', kwargs={'pk': self.pk})
 

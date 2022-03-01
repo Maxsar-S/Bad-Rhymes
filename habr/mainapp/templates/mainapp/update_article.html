@@ -14,16 +14,34 @@
 <h4>Редактирование статьи {{ article.title }}</h4>
 <form action="{% url 'mainapp:update_article' article.pk %}" method="post" enctype="multipart/form-data" id="FormOne">
     {% csrf_token %}
-    <div class="card col-lg-6 offset-lg-3 mb-3">
-        {% for field in form %}
-
-        <div class="card-body">
-            <label class="form-label">{{field.label}}</label>
-            {{field}}
-        </div>
-        {% endfor %}
-
+    <div class="card-body">
+        <label class="form-label" for="{{ form.title.id_for_label }}">Введите заголовок</label>
+        <input class="form-control" placeholder="{{ article.title }}" {{ form.title }}
     </div>
+    <div class="card-body">
+        <label class="form-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+        {{ form.category }}
+    </div>
+    <div class="card-body">
+        <label class="form-label" for="{{ form.article_text.id_for_label }}">{{ form.article_text.label }}</label>
+        <input class="form-control" placeholder="{{ article.article_text }}" {{ form.article_text }}
+    </div>
+    <div class="card-body">
+        <label class="form-label" for="{{ form.is_published.label }}">{{ form.is_published.label }}</label>
+        {{ form.is_published  }}
+    </div>
+
+
+
+{#        {% for field in form %}#}
+{##}
+{#        <div class="card-body">#}
+{#            <label class="form-label">{{field.label}}</label>#}
+{#            {{field}}#}
+{#        </div>#}
+{#        {% endfor %}#}
+{##}
+{#    </div>#}
 
     <div class="card col-lg-6 offset-lg-3 mb-3">
         <input type='submit' value="Опубликовать"/>
