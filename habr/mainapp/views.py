@@ -129,7 +129,6 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
     pk = None
     login_url = '/auth/login/'
 
-
     def get_success_url(self):
         return reverse_lazy('mainapp:article', kwargs={'pk': self.pk})
 
@@ -138,14 +137,16 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
         self.pk = self.object.pk
         return super(ArticleUpdateView, self).form_valid(form)
 
-    # def get_context_data(self, **kwargs):
-    #     content = super(ArticleUpdateView, self).get_context_data(**kwargs)
-    #     content['title'] = 'Редактирование статьи'
-    #     content['article'] = Article.objects.get(field=self.object.pk)
-    #     return content
+    def get_context_data(self, **kwargs):
+        pk = self.kwargs.get('pk')
+        content = super(ArticleUpdateView, self).get_context_data(**kwargs)
+        content['title'] = 'Редактирование статьи'
+        content['article'] = Article.objects.get(pk=pk)
+        return content
 
-    # def get_object(self, queryset=None):
-    #     return Article.objects.get(pk=self.request.pk)
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get('pk')
+        return Article.objects.get(pk=pk)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

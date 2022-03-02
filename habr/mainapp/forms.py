@@ -28,10 +28,10 @@ class UpdateArticleForm(forms.ModelForm):
             'is_published': 'Опубликовать сразу?'
         }
 
-    # def __init__(self, *args, **kwargs):
-    #     super(UpdateArticleForm, self).__init__(*args, **kwargs)
-    #     for field_name, field in self.fields.items():
-    #         field.widget.attrs['class'] = 'form-control'
+    def __init__(self, *args, **kwargs):
+        super(UpdateArticleForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
 
 
 class CommentForm(forms.ModelForm):

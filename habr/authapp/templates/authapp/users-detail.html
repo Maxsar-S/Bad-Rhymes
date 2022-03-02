@@ -5,9 +5,11 @@
     <a href="/" data-page-id="752105316"
        class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-none u-text-black u-text-hover-white u-btn-1">На
         главную</a>
+    {% if not user.is_banned %}
     <a href="/article/create" data-page-id="353919755"
        class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-none u-text-black u-text-hover-white u-btn-2">Создать
         статью</a>
+    {% endif %}
 </div>
 <div class="u-align-center">
     {% if user_detail.is_banned %}
