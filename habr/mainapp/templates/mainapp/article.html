@@ -1,11 +1,10 @@
 {% extends 'mainapp/base.html' %}
 {% load static %}
-
+{% block title %} Статья {% endblock %}
 {% block content %}
 
 <div class="container my-5 py-5">
 
-  <!-- Nav buttons -->
   <div class="u-clearfix u-section-1 ">
     <a href="/" data-page-id="752105316"
        class="u-border-2 u-border-black u-btn u-button-style u-hover-black btn-outline-dark u-btn-1">
@@ -21,13 +20,6 @@
             </button>
           </form>
         {% endif %}
-<!--        {% if not article.is_published %}-->
-<!--          <form method="post" action="{% url 'mainapp:publish_article' article.pk %}"-->
-<!--                onclick="return confirm('Вы готовы опубликовать эту статью?')"> {% csrf_token %}-->
-<!--            <button class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-btn-2">Опубликовать-->
-<!--            </button>-->
-<!--          </form>-->
-<!--        {% endif %}-->
           <form method="post" action="{% url 'mainapp:update_article' article.pk %}"
                 onclick="return confirm('Вы действительно хотите редактировать эту статью?')"> {% csrf_token %}
             <button class="u-border-2 u-border-black u-btn u-button-style u-hover-black u-btn-2">Редактировать статью
@@ -44,8 +36,7 @@
       <div>
         <!-- Фото -->
         <div class="bg-image hover-overlay shadow-1-strong ripple rounded-5 mb-4"
-             data-mdb-ripple-color="light">
-          <img src="https://mdbcdn.b-cdn.net/img/new/fluid/city/113.webp" class="img-fluid" />
+             data-mdb-ripple-color="light"><img src="{% if article.image %} {{ article.image.url }} {% else %} https://mdbcdn.b-cdn.net/img/new/slides/080.webp {% endif %}" alt="Article Image" class="img-fluid" width="900>
           <a href="#!">
             <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
           </a>
@@ -64,7 +55,7 @@
           </div>
 
           <div class="col-4 text-end">
-            <u> {{ article.created_date }}</u>
+            <u> {{ article.created_date|date:"d.m.Y" }} {{ article.created_date|time:"H:i" }}</u>
           </div>
         </div>
 

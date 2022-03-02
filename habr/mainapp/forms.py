@@ -3,9 +3,11 @@ from .models import Article, Comment
 
 
 class CreateArticleForm(forms.ModelForm):
+    image = forms.ImageField(widget=forms.FileInput(), required=False)
+
     class Meta:
         model = Article
-        fields = ['title', 'category', 'article_text', 'is_published']
+        fields = ['title', 'category', 'image', 'article_text', 'is_published']
         labels = {
             'title': 'Введите заголовок',
             'article_text': "Ваши мысли тут",
@@ -14,22 +16,6 @@ class CreateArticleForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CreateArticleForm, self).__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
-
-
-class UpdateArticleForm(forms.ModelForm):
-    class Meta:
-        model = Article
-        fields = ['title', 'category', 'article_text', 'is_published']
-        labels = {
-            'title': 'Введите заголовок',
-            'article_text': "Ваши мысли тут",
-            'is_published': 'Опубликовать сразу?'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(UpdateArticleForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
 

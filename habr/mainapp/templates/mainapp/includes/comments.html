@@ -8,7 +8,11 @@
 
                 <div class="card">
                     <div class="card-body p-4">
+                        {% if article.is_published %}
+                        {% if request.user.is_authenticated %}
                         <h4 class="text-center mb-4 pb-2">Комментарии</h4>
+                        {% endif %}
+                        {% endif %}
                         <div class="row">
                             <div class="col">
                                 {% for comment in comments %}
@@ -26,7 +30,7 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <p class="mb-1">
                                                     <a class="link-dark" href="{% url 'auth:users_detail' comment.author.pk %}">{{ comment.author }} </a>
-                                                    <span class="small text-align left">написал {{ comment.created_at|time:"H:i" }}</span>
+                                                    <span class="small text-align left">написал {{ comment.created_at|date:"d.m.Y" }} {{ comment.created_at|time:"H:i" }} </span>
                                                 </p>
 
                                             </div>
@@ -51,6 +55,7 @@
                                     {% endif %}
 
                                 </div>
+                                {% if request.user.is_authenticated %}
                                 <div align="right">
                                     <button class="btn btn-link">
                                         <i class="fas fa-reply fa-xs" onclick="commentReplyToggle('{{ comment.pk }}')">
@@ -70,7 +75,7 @@
                                     </div>
                                 </div>
 
-
+                                {% endif %}
                                 {% for child_comment in comment.children %}
                                 <div class="d-flex flex-end mt-4 ms-5">
                                     <a class="me-3 ml-5" href="#">
@@ -87,7 +92,7 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <p class="mb-1">
                                                     <a class="link-dark" href="{% url 'auth:users_detail' child_comment.author.pk %}">
-                                                        {{ child_comment.author }}</a> <span class="small "> ответил {{ child_comment.created_at|time:"H:i" }} </span>
+                                                        {{ child_comment.author }}</a> <span class="small "> ответил {{ child_comment.created_at|date:"d.m.Y" }} {{ child_comment.created_at|time:"H:i" }} </span>
                                                 </p>
                                             </div>
                                             <p class="small mb-0 u-align-left">
@@ -128,12 +133,21 @@
                         </div>
                     </div>
                 </div>
-                <form method="POST" action="{% url 'mainapp:comment' article.pk %}">
+                {% if request.user.is_authenticated %}
+                {% if article.is_published %}
+                <form class="u-align-center" method="POST" action="{% url 'mainapp:comment' article.pk %}">
                     {% csrf_token %}
                     <p></p>
                     {{ form }}
                     <input type="submit" value="Отправить"/>
                 </form>
+                {% endif %}
+                {% endif %}
+                <br>
+                {% if not request.user.is_authenticated %}
+                    Хотите оценить статью или оставить комментарий?
+                    <a href="{% url 'auth:users_create' %}?next={{request.path}}" target="_blank">Зарегистрируйтесь!</a>
+                {% endif %}
             </div>
 
 

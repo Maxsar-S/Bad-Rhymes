@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 
 from authapp.models import User
 from moderation.models import Report
-from .forms import CommentForm, CreateArticleForm, UpdateArticleForm
+from .forms import CommentForm, CreateArticleForm
 from .models import ArticleCategory, Article, Comment
 
 
@@ -22,7 +22,7 @@ class AuthorTestMixin(UserPassesTestMixin):
 
 class BanTestMixin(UserPassesTestMixin):
     def test_func(self):
-        self.permission_denied_message = 'вы забанены'
+        self.permission_denied_message = 'Вы забанены'
         return not self.request.user.is_banned
 
 
@@ -39,7 +39,7 @@ def get_top10_users():
 class ArticlesView(ListView):
     model = Article
     ordering = '-created_date'
-    paginate_by = 100
+    paginate_by = 5
     template_name = 'mainapp/articles.html'
     context_object_name = 'articles'
     extra_context = {
@@ -124,8 +124,8 @@ class ArticleCreateView(LoginRequiredMixin, BanTestMixin, CreateView):
 @method_decorator(csrf_exempt, name='dispatch')
 class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
     model = Article
-    template_name = 'mainapp/update_article.html'
-    form_class = UpdateArticleForm
+    template_name = 'mainapp/create_article.html'
+    form_class = CreateArticleForm
     pk = None
     login_url = '/auth/login/'
 
@@ -137,16 +137,16 @@ class ArticleUpdateView(LoginRequiredMixin, AuthorTestMixin, UpdateView):
         self.pk = self.object.pk
         return super(ArticleUpdateView, self).form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        pk = self.kwargs.get('pk')
-        content = super(ArticleUpdateView, self).get_context_data(**kwargs)
-        content['title'] = 'Редактирование статьи'
-        content['article'] = Article.objects.get(pk=pk)
-        return content
-
-    def get_object(self, queryset=None):
-        pk = self.kwargs.get('pk')
-        return Article.objects.get(pk=pk)
+    # def get_context_data(self, **kwargs):
+    #     pk = self.kwargs.get('pk')
+    #     content = super(ArticleUpdateView, self).get_context_data(**kwargs)
+    #     content['title'] = 'Редактирование статьи'
+    #     content['article'] = Article.objects.get(pk=pk)
+    #     return content
+    #
+    # def get_object(self, queryset=None):
+    #     pk = self.kwargs.get('pk')
+    #     return Article.objects.get(pk=pk)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

@@ -1,6 +1,6 @@
 {% load static %}
 
-
+<div class="u-align-center">
 <h3>Возможно, Вам так же будут интересны эти статьи</h3>
 <section class="u-clearfix u-section-5" id="sec-b655">
     <div class="u-clearfix u-sheet u-valign-middle u-sheet-1"><!--blog--><!--blog_options_json-->
@@ -16,7 +16,7 @@
                                 <!--blog_post_header_content-->{{article.title}}<!--/blog_post_header_content--></a>
                         </h4><!--/blog_post_header-->
                         <a class="u-post-header-link" href="/article/{{ article.pk }}"><!--blog_post_image-->
-                            <img src="{% static 'images/{{ article.pk }}.jpeg' %}" alt=""
+                            <img src="{% if article.image %} {{ article.image.url }} {% else %} https://mdbcdn.b-cdn.net/img/new/slides/080.webp {% endif %}" alt=""
                                  class="u-blog-control u-expanded-width u-image u-image-default u-image-1">
                             <!--/blog_post_image-->
                         </a><!--blog_post_content-->
@@ -56,4 +56,6 @@ c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,24
 
         </div>
     </div>
+
 </section>
+    </div>

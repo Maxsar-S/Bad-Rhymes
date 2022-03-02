@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'searchapp',
     'adminapp',
     'moderation',
-    'userprofile',
     'habr',
     'django_registration',
 ]
