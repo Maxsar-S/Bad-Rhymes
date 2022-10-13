@@ -1,7 +1,6 @@
-В данном проекте реализован сайт для публикации статей с возможностью их комментирования, проставления оценок (лайков)
-и модерации. Для публикаций имеется возможность сортировки и поиска по значению, для административной 
-деятельности на сайте создан кабинет модератора, где модератор сайта может блокировать или 
-разблокировать любые статьи. Создана верификация аккаунта через электронную почту. Для построения проекта использовался 
-Django Framework с применением CBV
+Graduate project
+My team developed site to public articles, which can be commented, rated and moderate. 
+Articles can be sorted and searched. Moderator has own administators's section, where he can block or ublock any article. 
+Site has account verification using email. This project was based on Django Framework using CBV.
 
-Мной была реализована система аутентификации и поиска (authapp и searchapp)
+I have implemented an authentication and search system (authapp and searchapp)
